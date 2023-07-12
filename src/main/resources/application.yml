@@ -1,0 +1,15 @@
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9091,localhost:9092,localhost:9093
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.UUIDSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        avro.use.logical.type.converters: true
+        avro.remove.java.properties: true
+        schema:
+          registry:
+            url: http://localhost:8081
+server:
+  port: 8089

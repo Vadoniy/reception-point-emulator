@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.1.1</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.example</groupId>
+    <artifactId>reception-point-emulator</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>reception-point-emulator</name>
+    <description>reception-point-emulator</description>
+    <properties>
+        <java.version>20</java.version>
+        <avro.version>1.11.2</avro.version>
+        <avro.serializer.version>7.4.0</avro.serializer.version>
+        <io.confluent.schema-registry.version>7.4.0</io.confluent.schema-registry.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>confluent</id>
+            <name>Confluent</name>
+            <url>https://packages.confluent.io/maven/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>${avro.serializer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>${avro.version}</version>
+                <executions>
+                    <execution>
+                        <id>schemas</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/resources/avro/</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/avro</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>io.confluent</groupId>-->
+<!--                <artifactId>kafka-schema-registry-maven-plugin</artifactId>-->
+<!--                <version>${avro.serializer.version}</version>-->
+<!--                <configuration>-->
+<!--                    <schemaRegistryUrls>-->
+<!--                        <param>http://0.0.0.0:8081</param>-->
+<!--                    </schemaRegistryUrls>-->
+<!--                    <outputDirectory>${project.build}/avro</outputDirectory>-->
+<!--                    <userInfoConfig />-->
+<!--                    <subjects>-->
+<!--                        <com.example.receptionpointemulator.dto2.SmartPhoneAvro>src/main/resources/avro/smartphone-schema-dto.avsc</com.example.receptionpointemulator.dto2.SmartPhoneAvro>-->
+<!--                    </subjects>-->
+<!--                    <schemaTypes>-->
+<!--                        <com.example.receptionpointemulator.dto2.SmartPhoneAvro>AVRO</com.example.receptionpointemulator.dto2.SmartPhoneAvro>-->
+<!--                    </schemaTypes>-->
+<!--                    <compatibilityLevels/>-->
+<!--                    <messagePath/>-->
+<!--                    <outputDirectory/>-->
+<!--                    <outputPath/>-->
+<!--                    <previousSchemaPaths/>-->
+<!--                    <schemas/>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>generate-avro-classes</id>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>derive-schema</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <schemaRegistryUrl>http://localhost:8081</schemaRegistryUrl>-->
+<!--                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>-->
+<!--                            <subjects>-->
+<!--                                <all-received-smartphone-topic>src/main/resources/avro/smartphone-schema-dto.avsc</all-received-smartphone-topic>-->
+<!--                            </subjects>-->
+<!--                            <messagePath>src/main/resources/avro/smartphone-schema-dto.avsc</messagePath>-->
+<!--                            <outputPath>${project.build.directory}/generated-sources/avro</outputPath>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+
+<!--&lt;!&ndash;                    <execution>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <id>schemas</id>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <phase>generate-sources</phase>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <goals>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <goal>schema</goal>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </goals>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <sourceDirectory>${project.basedir}/src/main/resources/avro/</sourceDirectory>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <outputDirectory>${project.build.directory}/generated-sources/avro</outputDirectory>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </execution>&ndash;&gt;-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
+        </plugins>
+    </build>
+
+</project>
