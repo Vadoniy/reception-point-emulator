@@ -20,7 +20,6 @@ public class SmartphoneGenerator {
         final var screen = generateScreen(model, ssn);
         final var motherBoard = generateMotherBoard(model, ssn);
         final var battery = generateBattery(model, ssn);
-//        return new SmartPhoneAvro(model.getManufacturer(), battery, model.name(), motherBoard, screen, ssn);
         return SmartPhoneAvro.newBuilder()
                 .setModel(model.name())
                 .setBattery(battery)
@@ -31,14 +30,8 @@ public class SmartphoneGenerator {
                 .build();
     }
 
-//    public static ManufacturerAvro getRandomManufacturer() {
-//        final var random = new Random();
-//        return ManufacturerAvro.values()[random.nextInt(ManufacturerAvro.values().length)];
-//    }
-
     private ScreenAvro generateScreen(Model model, String ssn) {
         final var random = new Random();
-//        return new ScreenAvro(random.nextBoolean(), model.getManufacturer(), model.name(), ssn);
         return ScreenAvro.newBuilder()
                 .setManufacturer(model.getManufacturer())
                 .setModel(model.name())
@@ -50,7 +43,6 @@ public class SmartphoneGenerator {
 
     private MotherBoardAvro generateMotherBoard(Model model, String ssn) {
         final var random = new Random();
-//        return new MotherBoardAvro(random.nextBoolean(), model.getManufacturer(), model.name(), ssn);
         return MotherBoardAvro.newBuilder()
                 .setBroken(random.nextBoolean())
                 .setModel(model.name())
@@ -60,7 +52,6 @@ public class SmartphoneGenerator {
     }
 
     private BatteryAvro generateBattery(Model model, String ssn) {
-//        return new BatteryAvro(true, model.getManufacturer(), model.name(), ssn);
         return BatteryAvro.newBuilder()
                 .setBroken(true)
                 .setManufacturer(model.getManufacturer())

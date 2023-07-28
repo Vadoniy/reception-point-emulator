@@ -4,17 +4,16 @@ import avro.schema.SmartPhoneAvro;
 import com.example.receptionpointemulator.dto.enums.Manufacturer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.specific.SpecificRecord;
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -22,25 +21,37 @@ import java.util.UUID;
 public class ReceptionPointEmulatorServiceImpl {
     private static final String RECEPTION_POINT_TOPIC = "reception-point-topic";
     private final SmartphoneGenerator smartphoneGenerator;
-    private final KafkaTemplate<UUID, SpecificRecord> kafkaTemplate;
-//    private final KafkaProducer<UUID, SmartPhoneAvro> kafkaProducer;
+    private final KafkaProducer<UUID, SmartPhoneAvro> kafkaProducer;
 
-    @Scheduled(cron = "0/10 * * * * *")
+    @Scheduled(cron = "0/3 * * * * *")
     public void getNewSmartphone() {
+//        removeAllTopics();
         final var smartPhone = smartphoneGenerator.generateSmartphone(Manufacturer.getRandomManufacturer());
         final var record = new ProducerRecord<>(RECEPTION_POINT_TOPIC, UUID.fromString(smartPhone.getSsn().toString()), smartPhone);
-//        final var record = new ProducerRecord<>(RECEPTION_POINT_TOPIC, UUID.fromString(smartPhone.getSsn().toString()), smartPhone);
-//        kafkaTemplate.send(RECEPTION_POINT_TOPIC, smartPhone);
-//        kafkaProducer.send(record);
-        Message<SmartPhoneAvro> build = MessageBuilder.withPayload(smartPhone)
-                .setHeader(KafkaHeaders.TOPIC, RECEPTION_POINT_TOPIC)
-                .setHeader(KafkaHeaders.KEY, UUID.fromString(smartPhone.getSsn().toString()))
-                .build();
-        kafkaTemplate.send(build);
-        log.info("SmartPhone {} - {} with ssn {} was sent to {}",
+        kafkaProducer.send(record);
+        log.info("SmartPhone {} - {} with ssn {}, is broken: {}",
                 smartPhone.getManufacturer().name(),
                 smartPhone.getModel(),
                 smartPhone.getSsn(),
-                RECEPTION_POINT_TOPIC);
+                isSmartphoneBroken(smartPhone));
+    }
+
+    private String isSmartphoneBroken(SmartPhoneAvro smartPhoneAvro) {
+        return String.format("MotherBoard is %s, screen is %s",
+                smartPhoneAvro.getMotherBoard().getBroken() ? "broken" : "ok",
+                smartPhoneAvro.getScreen().getBroken() ? "broken" : "ok");
+    }
+
+    private void removeAllTopics() {
+        try {
+            final Map<String, Object> adminConfig = Map.of(
+                    AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9091,localhost:9092,localhost:9093");
+            final var kafkaAdmin = Admin.create(adminConfig);
+            final var listTopicsResult = kafkaAdmin.listTopics().names().get();
+            kafkaAdmin.deleteTopics(listTopicsResult);
+            log.info("All topics are removed");
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
